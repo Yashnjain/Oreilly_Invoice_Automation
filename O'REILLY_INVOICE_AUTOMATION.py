@@ -11,7 +11,20 @@ import sharepy
 import os
 from bu_config import get_config
 import bu_alerts
+import smtplib
+import email.mime.multipart
+import email.mime.text
+import email.mime.base
+import email.encoders as encoders
 
+#Global VARIABLES
+site = 'https://biourja.sharepoint.com'
+path1 = "/BiourjaPower/_api/web/GetFolderByServerRelativeUrl"
+path2= "Shared%20Documents/Power%20Reference/Power_Invoices/O_Reilly/"
+# path2= "Shared Documents/Vendor Research/Enverus(PRT)/ERCOT"
+temp_path='https://biourja.sharepoint.com/BiourjaPower/Shared%20Documents/Power%20Reference/Power_Invoices/O_Reilly'
+locations_list=[]
+body = ''
 
 today_date=date.today()
 # log progress --
@@ -30,8 +43,6 @@ logging.info('setting paTH TO DOWNLOAD')
 path = os.getcwd() + "\\Download"
 
 logging.info('SETTING PROFILE SETTINGS FOR FIREFOX')
-
-
 profile = webdriver.FirefoxProfile()
 profile.set_preference('browser.download.folderList', 2)
 profile.set_preference('browser.download.dir', path)
@@ -42,10 +53,67 @@ profile.set_preference('pdfjs.disabled', True)
 logging.info('Adding firefox profile')
 driver=webdriver.Firefox(executable_path=GeckoDriverManager().install(),firefox_profile=profile)
 
-site = 'https://biourja.sharepoint.com'
-path1 = "/BiourjaPower/_api/web/GetFolderByServerRelativeUrl"
-path2= "Shared%20Documents/Power%20Reference/Power_Invoices/O_Reilly/"
-# path2= "Shared Documents/Vendor Research/Enverus(PRT)/ERCOT"
+def send_mail(receiver_email: str, mail_subject: str, mail_body: str, attachment_locations: list = None, sender_email: str = None, sender_password: str=None) -> bool:
+    """The Function responsible to do all the mail sending logic.
+
+    Args:
+        sender_email (str): Email Id of the sender.
+        sender_password (str): Password of the sender.
+        receiver_email (str): Email Id of the receiver.
+        mail_subject (str): Subject line of the email.
+        mail_body (str): Message body of the Email.
+        attachment_locations (list, optional): Absolute path of the attachment. Defaults to None.
+
+    Returns:
+        bool: [description]
+    """
+    logging.info("INTO THE SEND MAIL FUNCTION")
+    done = False
+    try:
+        logging.info("GIVING CREDENTIALS FOR SENDING MAIL")
+        if not sender_email or sender_password:
+            sender_email = "biourjapowerdata@biourja.com"
+            sender_password = r"bY3mLSQ-\Q!9QmXJ"
+            # sender_email = r"virtual-out@biourja.com"
+            # sender_password = "t?%;`p39&Pv[L<6Y^cz$z2bn"
+        receivers = receiver_email.split(",")
+        msg = email.mime.multipart.MIMEMultipart()
+        msg['From'] = "biourjapowerdata@biourja.com"
+        msg['To'] = receiver_email
+        msg['Subject'] = mail_subject
+        body = mail_body
+        logging.info("Attaching mail body")
+        msg.attach(email.mime.text.MIMEText(body, 'html'))
+        logging.info("Attching files in the mail")
+        for files_locations in attachment_locations:
+            with open(files_locations, 'r+b') as attachment:
+                # instance of MIMEBase and named as p
+                p = email.mime.base.MIMEBase('application', 'octet-stream')
+                # To change the payload into encoded form
+                p.set_payload((attachment).read())
+                encoders.encode_base64(p)  # encode into base64
+                p.add_header('Content-Disposition',
+                             "attachment; filename= %s" % files_locations)
+                msg.attach(p)  # attach the instance 'p' to instance 'msg'
+
+        # s = smtplib.SMTP('smtp.gmail.com', 587) # creates SMTP session
+        s = smtplib.SMTP('us-smtp-outbound-1.mimecast.com',
+                         587)  # creates SMTP session
+        s.starttls()  # start TLS for security
+        s.login(sender_email, sender_password)  # Authentication
+        text = msg.as_string()  # Converts the Multipart msg into a string
+
+        s.sendmail(sender_email, receivers, text)  # sending the mail
+        s.quit()  # terminating the session
+        done = True
+        logging.info("Email sent successfully")
+        print("Email sent successfully.")
+    except Exception as e:
+        print(
+            f"Could not send the email, error occured, More Details : {e}")
+    finally:
+        return done
+
 
 def remove_existing_files(files_location):
     logger.info("Inside remove_existing_files function")
@@ -109,8 +177,6 @@ def login_and_download():
     except Exception as e:
         raise e
 
-
-
 def connect_to_sharepoint():
     logging.info('Connecting to sharepoint')
     try:
@@ -123,13 +189,15 @@ def connect_to_sharepoint():
     except Exception as e:
         raise e
 
-
 def shp_file_upload(s):
     logging.info('Uploading files to sharepoint')
     try:
+        global body
+        body = ''
         filesToUpload = os.listdir(os.getcwd() + "\\Download")
         for fileToUpload in filesToUpload:
-                
+            z=path+'\\'+fileToUpload
+            locations_list.append(z)     
             headers = {"accept": "application/json;odata=verbose",
             "content-type": "application/pdf"}
 
@@ -137,8 +205,9 @@ def shp_file_upload(s):
                     content = read_file.read()
             fileToUpload=fileToUpload.replace("'","_")     
             p = s.post(f"{site}{path1}('{path2}')/Files/add(url='{fileToUpload}',overwrite=true)", data=content, headers=headers)
-                # url = f"https://biourja.sharepoint.com/_api/web/GetFolderByServerRelativeUrl('Shared Documents/Vendor Research/Enverus(PRT)/PJMISO')/Files/add(url='dummy.pdf',overwrite=true)"
-                # r = s.post(url.format("C:/Users/Yashn.jain/Desktop/First_Project", "Enverus_PJM 90 Price Forecast 02-02-22T.pdf"), data=content, headers=headers)
+            nl = '<br>'
+            body += (f'{fileToUpload} successfully uploaded, {nl} Attached link for the same:-{nl}{temp_path}{nl}')
+
         print(f'{fileToUpload} uploaded successfully')
     
         print(f'{job_name} executed succesfully')
@@ -153,20 +222,20 @@ def main():
         login_and_download()
         s=connect_to_sharepoint()
         shp_file_upload(s)
-        bu_alerts.send_mail(receiver_email = receiver_email,mail_subject =f'JOB SUCCESS - {job_name}',mail_body = f'{job_name} completed successfully, Attached logs',attachment_location = logfile)
+        locations_list.append(logfile)
+        send_mail(receiver_email = receiver_email,mail_subject =f'JOB SUCCESS - {job_name}',mail_body = f'{body}{job_name} completed successfully, Attached PDF and Logs',attachment_locations = locations_list)
     except Exception as e:
         logging.exception(str(e))
         bu_alerts.send_mail(receiver_email = receiver_email,mail_subject =f'JOB FAILED -{job_name}',mail_body = f'{job_name} failed, Attached logs',attachment_location = logfile)
-            
-    
+                
 if __name__ == "__main__":
     logging.info("Execution Started")
     time_start=time.time()
     directories_created=["Download","Logs"]
     for directory in directories_created:
-        path = os.path.join(os.getcwd(),directory)  
+        path3 = os.path.join(os.getcwd(),directory)  
         try:
-            os.makedirs(path, exist_ok = True)
+            os.makedirs(path3, exist_ok = True)
             print("Directory '%s' created successfully" % directory)
         except OSError as error:
             print("Directory '%s' can not be created" % directory)
@@ -180,6 +249,7 @@ if __name__ == "__main__":
     sp_username = credential_dict['USERNAME'].split(';')[1]
     sp_password =  credential_dict['PASSWORD'].split(';')[1]
     receiver_email = credential_dict['EMAIL_LIST']
+    # receiver_email ='yashn.jain@biourja.com'
     job_name='OREILLY_INVOICE_AUTOMATION'
    
     main()
