@@ -1,4 +1,3 @@
-from ast import Return
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -150,12 +149,12 @@ def login_and_download():
         logging.info('Accesing website')
         driver.get("https://www.oreilly.com/member/login")
         logging.info('providing id and passwords')
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "//input[@placeholder='Email Address']"))).send_keys(username)
+        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/div[1]/section/section/form/div/label/input"))).send_keys(username)
         time.sleep(1)
         logging.info('Continue Button')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "//button[@class='orm-Button-root']"))).click()
         time.sleep(1)
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "//input[@placeholder='Password']"))).send_keys(password)
+        WebDriverWait(driver, 9, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/section/div[1]/section/section/section/form/div[1]/div/label/input'))).send_keys(password)        
         time.sleep(1)
         logging.info('click on Sign In Button')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".orm-Button-root.FullWidth--FD7XS"))).click()
