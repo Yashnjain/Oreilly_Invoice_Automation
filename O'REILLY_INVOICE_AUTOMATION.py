@@ -175,6 +175,8 @@ def login_and_download():
         logging.info(f'File is downloaded in {download_wait()} seconds.')
     except Exception as e:
         raise e
+    finally:
+        driver.close()    
 
 def connect_to_sharepoint():
     logging.info('Connecting to sharepoint')
