@@ -173,10 +173,13 @@ def login_and_download():
         time.sleep(10)
         logging.info('*****************Download Successfully*************')
         logging.info(f'File is downloaded in {download_wait()} seconds.')
+        try:
+            driver.close()
+        except Exception as e: 
+            logging.info('driver not closed')
+            print("driver not closed") 
     except Exception as e:
-        raise e
-    finally:
-        driver.close()    
+        raise e   
 
 def connect_to_sharepoint():
     logging.info('Connecting to sharepoint')
