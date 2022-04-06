@@ -178,6 +178,11 @@ def login_and_download():
         except Exception as e: 
             logging.info('driver not closed')
             print("driver not closed") 
+            try:
+                driver.quit()
+            except Exception as e: 
+                logging.info('driver quit failed')
+                print("driver quit failed") 
     except Exception as e:
         raise e   
 
