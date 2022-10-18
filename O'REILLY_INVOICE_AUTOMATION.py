@@ -50,7 +50,7 @@ profile.set_preference('browser.download.viewableInternally.enabledTypes', "")
 profile.set_preference('browser.helperApps.neverAsk.saveToDisk','Portable Document Format (PDF), application/pdf')
 profile.set_preference('pdfjs.disabled', True)
 logging.info('Adding firefox profile')
-driver=webdriver.Firefox(executable_path=GeckoDriverManager().install(),firefox_profile=profile)
+
 
 def send_mail(receiver_email: str, mail_subject: str, mail_body: str, attachment_locations: list = None, sender_email: str = None, sender_password: str=None) -> bool:
     """The Function responsible to do all the mail sending logic.
@@ -140,12 +140,12 @@ def download_wait(path_to_downloads= os.getcwd() + '\\Download'):
                 dl_wait = False
         seconds += 1
     time.sleep(seconds)
-    driver.quit()
     return seconds
 
 def login_and_download():  
     '''This function downloads log in to the website'''
     try:
+        driver=webdriver.Firefox(executable_path=GeckoDriverManager().install(),firefox_profile=profile)
         logging.info('Accesing website')
         driver.get("https://www.oreilly.com/member/login")
         logging.info('providing id and passwords')
