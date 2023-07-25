@@ -33,6 +33,15 @@ def remove_existing_files(files_location):
 def login_and_download():  
     '''This function downloads log in to the website'''
     try:
+        logging.info('SETTING PROFILE SETTINGS FOR FIREFOX')
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference('browser.download.folderList', 2)
+        profile.set_preference('browser.download.dir', path)
+        profile.set_preference('browser.download.useDownloadDir', True)
+        profile.set_preference('browser.download.viewableInternally.enabledTypes', "")
+        profile.set_preference('browser.helperApps.neverAsk.saveToDisk','Portable Document Format (PDF), application/pdf')
+        profile.set_preference('pdfjs.disabled', True)
+        logging.info('Adding firefox profile')
         driver=webdriver.Firefox(executable_path=GeckoDriverManager().install(),firefox_profile=profile)
         logging.info('Accesing website')
         driver.get(url)
@@ -54,7 +63,7 @@ def login_and_download():
         driver.switch_to.default_content()
         logging.info('click on Settings Tab')
         WebDriverWait(driver, 120, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/header/div/div[5]"))).click()
-        time.sleep(5)
+        time.sleep(15)
         WebDriverWait(driver, 120, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[7]/div[3]/ul/a[4]"))).click()
         logging.info('Accessing plans and payment')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/nav/ul/li[5]"))).click()
@@ -144,6 +153,7 @@ if __name__ == "__main__":
     try:
         logging.info("Execution Started")
         starttime=datetime.now()
+        job_id=np.random.randint(1000000,9999999)
         locations_list=[]
         body = ''
 
@@ -162,19 +172,25 @@ if __name__ == "__main__":
 
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
+
+        credential_dict = get_config('OREILLY_INVOICE_AUTOMATION','OREILLY_INVOICE_AUTOMATION')
+        username = credential_dict['USERNAME'].split(';')[0]
+        password = credential_dict['PASSWORD'].split(';')[0]
+        sp_username = credential_dict['USERNAME'].split(';')[1]
+        sp_password =  credential_dict['PASSWORD'].split(';')[1]
+        receiver_email = credential_dict['EMAIL_LIST']
+        #receiver_email ='enoch.benjamin@biourja.com'
+        url=credential_dict['SOURCE_URL'].split(';')[0]
+        site=credential_dict['SOURCE_URL'].split(';')[2]
+        path1=credential_dict['SOURCE_URL'].split(';')[3]
+        path2=credential_dict['SOURCE_URL'].split(';')[4]
+        temp_path=f'{site}/BiourjaPower/{path2}'
+        job_name=credential_dict['PROJECT_NAME']
+        processname = credential_dict['PROJECT_NAME']
+        process_owner = credential_dict['IT_OWNER']
+
         logging.info('setting paTH TO DOWNLOAD')
         path = os.getcwd() + "\\download"
-
-        logging.info('SETTING PROFILE SETTINGS FOR FIREFOX')
-        profile = webdriver.FirefoxProfile()
-        profile.set_preference('browser.download.folderList', 2)
-        profile.set_preference('browser.download.dir', path)
-        profile.set_preference('browser.download.useDownloadDir', True)
-        profile.set_preference('browser.download.viewableInternally.enabledTypes', "")
-        profile.set_preference('browser.helperApps.neverAsk.saveToDisk','Portable Document Format (PDF), application/pdf')
-        profile.set_preference('pdfjs.disabled', True)
-        logging.info('Adding firefox profile')
-
      
         directories_created=["download","logs"]
         for directory in directories_created:
@@ -184,29 +200,8 @@ if __name__ == "__main__":
                 print("Directory '%s' created successfully" % directory)
             except OSError as error:
                 print("Directory '%s' can not be created" % directory)
-
         files_location=os.getcwd() + "\\download"
-        project_name="OREILLY_INVOICE_AUTOMATION"
-        table_name="OREILLY_INVOICE_AUTOMATION"
-        credential_dict = get_config('OREILLY_INVOICE_AUTOMATION','OREILLY_INVOICE_AUTOMATION')
-        username = credential_dict['USERNAME'].split(';')[0]
-        password = credential_dict['PASSWORD'].split(';')[0]
-        sp_username = credential_dict['USERNAME'].split(';')[1]
-        sp_password =  credential_dict['PASSWORD'].split(';')[1]
-        receiver_email = credential_dict['EMAIL_LIST']
-        url=credential_dict['SOURCE_URL'].split(';')[0]
-        site=credential_dict['SOURCE_URL'].split(';')[2]
-        path1=credential_dict['SOURCE_URL'].split(';')[3]
-        path2=credential_dict['SOURCE_URL'].split(';')[4]
-        temp_path=credential_dict['SOURCE_URL'].split(';')[4]
 
-        # receiver_email ='yashn.jain@biourja.com'
-        job_name=credential_dict['PROJECT_NAME']
-        job_id=np.random.randint(1000000,9999999)
-        processname = credential_dict['PROJECT_NAME']
-        process_owner = credential_dict['IT_OWNER']
-
-    
         main()
         endtime=datetime.now()
         logging.info('Complete work at {} ...'.format(endtime.strftime('%Y-%m-%d %H:%M:%S')))
