@@ -30,7 +30,7 @@ def remove_existing_files(files_location):
         raise e
 
 
-def login_and_download():  
+def  login_and_download():  
     '''This function downloads log in to the website'''
     try:
         logging.info('SETTING PROFILE SETTINGS FOR FIREFOX')
@@ -46,31 +46,18 @@ def login_and_download():
         logging.info('Accesing website')
         driver.get(url)
         logging.info('providing id and passwords')
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/div[1]/section/section/form/div/label/input"))).send_keys(username)
+        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/div[1]/\
+                                                                                      section/section/form/div/label/input"))).send_keys(username)
         time.sleep(5)
         logging.info('Continue Button')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "//button[@class='orm-Button-root']"))).click()
         time.sleep(5)
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/section/div[1]/section/section/section/form/div[1]/div/label/input'))).send_keys(password)        
+        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/section/div[1]\
+                                                                                      /section/section/section/form/div[1]/div/label/input'))).send_keys(password)        
         time.sleep(5)
         logging.info('click on Sign In Button')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".orm-Button-root.FullWidth--FD7XS"))).click()
         time.sleep(30)
-        driver.switch_to.frame(driver.find_element(By.XPATH,'/html/body/div[6]/appcues-container/iframe'))
-        logging.info('closing pop up window')
-        WebDriverWait(driver, 120, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/appcues/div[2]/a"))).click()
-        time.sleep(10)
-        driver.switch_to.default_content()
-        logging.info('click on Settings Tab')
-        WebDriverWait(driver, 120, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/header/div/div[5]"))).click()
-        time.sleep(15)
-        WebDriverWait(driver, 120, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[7]/div[3]/ul/a[4]"))).click()
-        logging.info('Accessing plans and payment')
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/nav/ul/li[5]"))).click()
-        time.sleep(10)
-        logging.info('clicking on Billing History')
-        WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/main/section/article/div/div/div[2]/div/a[2]"))).click()
-        time.sleep(10)
         logging.info('clicking on Download Button')
         WebDriverWait(driver, 90, poll_frequency=1).until(EC.element_to_be_clickable((By.XPATH, "//ul[1]//li[1]//div[4]//button[1]"))).click()
         time.sleep(60)
@@ -180,7 +167,7 @@ if __name__ == "__main__":
         sp_password =  credential_dict['PASSWORD'].split(';')[1]
         receiver_email = credential_dict['EMAIL_LIST']
         #receiver_email ='enoch.benjamin@biourja.com'
-        url=credential_dict['SOURCE_URL'].split(';')[0]
+        url=credential_dict['SOURCE_URL'].split(';')[1]
         site=credential_dict['SOURCE_URL'].split(';')[2]
         path1=credential_dict['SOURCE_URL'].split(';')[3]
         path2=credential_dict['SOURCE_URL'].split(';')[4]
