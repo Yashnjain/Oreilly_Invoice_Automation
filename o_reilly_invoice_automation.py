@@ -64,7 +64,7 @@ def  login_and_download():
         time.sleep(60)
         logging.info('*****************Download Successfully*************')
         try:
-            driver.close()
+            driver.quit()
         except Exception as e: 
             logging.info('driver not closed')
             print("driver not closed") 
