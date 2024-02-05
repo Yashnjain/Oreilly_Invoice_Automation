@@ -236,7 +236,10 @@ def main():
     except Exception as e:
         logging.exception(str(e))
         bu_alerts.send_mail(receiver_email = receiver_email,mail_subject =f'JOB FAILED -{job_name}',mail_body = f'{job_name} failed, Attached logs',attachment_location = logfile)
-                
+
+    finally:
+        print('process completed') 
+
 if __name__ == "__main__":
     logging.info("Execution Started")
     time_start=time.time()
@@ -264,3 +267,4 @@ if __name__ == "__main__":
     main()
     time_end=time.time()
     logging.info(f'It takes {time_start-time_end} seconds to run')       
+   
